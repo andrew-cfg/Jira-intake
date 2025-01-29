@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Story Intake Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        label {
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Create a Jira Story</h2>
+
+    <label for="storyName">Story Name:</label>
+    <input type="text" id="storyName" placeholder="Enter story name">
+
+    <label for="description">Description:</label>
+    <textarea id="description" placeholder="Enter story description"></textarea>
+
+    <label for="acceptanceCriteria">Acceptance Criteria:</label>
+    <textarea id="acceptanceCriteria" placeholder="Enter acceptance criteria"></textarea>
+
+    <button onclick="createJiraStory()">Submit Story to Jira</button>
+
+    <script>
+        async function createJiraStory() {
+            const storyName = document.getElementById("storyName").value;
+            const description = document.getElementById("description").value;
+            const acceptanceCriteria = document.getElementById("acceptanceCriteria").value;
+
+            if (!storyName || !description || !acceptanceCriteria) {
+                alert("Please fill in all the fields.");
+                return;
+            }
+
+            // Jira API credentials (replace these with your credentials)
+            const jiraBaseUrl = "https://yourcompany.atlassian.net";
+            const projectKey = "ITBACKLOG";  // Change this to your project key
+            const email = "your-email@example.com";  // Jira email
+            const apiToken = "your-api-token";  // Jira API token
+
+            // Prepare the data for the Jira Story
+            const issueData = {
+                fields: {
+                    project: {
+                        key: projectKey
+                    },
+                    summary: storyName,
+                    description: `${description}\n\nAcceptance Criteria:\n${acceptanceCriteria}`,
+                    issuetype: {
+                        name: "Story"
+                    }
+                }
+            };
+
+            // API request to create the Jira Story
+            try {
+                const response = await fetch(`${jiraBaseUrl}/rest/api/3/issue`, {
+                    method: "POST",
+                    headers: {
+                        "Authorization": "Basic " + btoa(email + ":" + apiToken),
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(issueData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`Jira Story Created: ${data.key}`);
+                } else {
+                    alert(`Error: ${JSON.stringify(data)}`);
+                }
+            } catch (error) {
+                console.error("Error creating Jira issue:", error);
+                alert("Failed to create Jira Story.");
+            }
+        }
+    </script>
+
+</body>
+</html>
